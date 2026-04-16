@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Earthquake Map</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+<style>
+    body { margin: 0; }
+    #map { height: 100vh; }
+
+    /* Title */
+    .title {
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        
+        background: linear-gradient(135deg, #0f172a, #1e3a8a);
+        color: #ffffff;
+
+        padding: 12px 28px;
+        border-radius: 15px;
+
+        font-size: 20px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+
+        box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+        border: 1px solid rgba(255,255,255,0.1);
+        
+        z-index: 1000;
+    }
+
+    /* Legend */
+    .legend {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        background: #111827;
+        color: white;
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 14px;
+        z-index: 1000;
+    }
+
+    .legend div {
+        margin-bottom: 5px;
+        display: flex;
+        align-items: center;
+    }
+
+    .color-box {
+        width: 15px;
+        height: 15px;
+        margin-right: 8px;
+    }
+</style>
+</head>
+
+<body>
+
+<!-- ✅ Title goes INSIDE body -->
+<div class="title">
+    🌍 Global Earthquake Monitoring Dashboard
+</div>
+
+<div id="map"></div>
+
+<!-- Legend -->
+<div class="legend">
+    <div><span class="color-box" style="background:#ff0000"></span> > 7 (Very High)</div>
+    <div><span class="color-box" style="background:#ff6600"></span> 6 - 7</div>
+    <div><span class="color-box" style="background:#ffcc00"></span> 5 - 6</div>
+    <div><span class="color-box" style="background:#00ccff"></span> < 5</div>
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+
+    const lat = parseFloat(params.get("lat"));
+    const lon = parseFloat(params.get("lon"));
+    const mag = parseFloat(params.get("mag"));
+    const place = params.get("place") || "Earthquake";
+
+    const defaultLat = lat || 20;
+    const defaultLon = lon || 0;
+
+    var map = L.map('map').setView([defaultLat, defaultLon], 4);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
+
+    function getColor(mag) {
+        return mag > 7 ? "#ff0000" :
+               mag > 6 ? "#ff6600" :
+               mag > 5 ? "#ffcc00" :
+                         "#00ccff";
+    }
+
+    if (lat && lon && mag) {
+        L.circleMarker([lat, lon], {
+            radius: mag * 4,
+            fillColor: getColor(mag),
+            color: "#fff",
+            weight: 1,
+            fillOpacity: 0.8
+        }).addTo(map)
+        .bindPopup(`<b>${place}</b><br>Magnitude: ${mag}`)
+        .openPopup();
+
+        map.setView([lat, lon], 6);
+    }
+</script>
+
+</body>
+</html>
